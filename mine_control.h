@@ -12,19 +12,15 @@
 //be a mine or an empty place.
 typedef struct 
 {
-    bool is_revealeud; //bool to check weather the tile has been selected and shown
+    bool is_revealed; //bool to check weather the tile has been selected and shown
     bool is_mine; //bool to check weather tile is a mine
-    uint8_t x_pos; // Where the tile is on the x plane
-    uint8_t y_pos; // Where the tile is on the y plane
-    uint8_t threat_value; //this will be the value indicating if a mine is close to the tile
-    tile* neighbor[]; //neighbors are the adjecent tiles next to each other.
-    //have to think about this one.^
+    bool is_flagged; //bool to check weather the tile is flagged^
 
-}tile;
+}tile_t;
 
 //The game board data structure.
 typedef struct {
-    tile squars[FEILD_MAX_ROWS][FEILD_MAX_COL]; //the field is just made up of tiles that are squares
+    tile_t squares[FEILD_MAX_ROWS][FEILD_MAX_COL]; //the field is just made up of tiles that are squares
 }mine_field;
 
 //This is the selected tile that a player will choose whice is defined by a row and coloum.
@@ -40,6 +36,18 @@ void mineControl_init();
 
 //normal tickfunction for the mineSweeper game top level
 void mineControl_tick();
+
+// getThreatLvl(x,y) takes a x and y postion on the field and checks the threat level of that tile
+uint8_t mineControl_getThreatLvl(uint8_t x, uint8_t y);
+
+//isRevealed(x,y,tile) takes an x and y postion on the field and returns a bool indicating weather the tile has already be selected
+bool mineControl_isRevealed(uint8_t x, uint8_t y,tile_t tile);
+
+//isMine(x,y,tile) takes an x/y postion on the field and returns a bool indicating weather the tile is a mine or not
+bool mineControl_isMine(uint8_t x, uint8_t y, tile_t tile);
+
+//sets a specific tile to be a flag
+void mineControl_setFlag(tile_t tile);
 
 
 
