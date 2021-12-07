@@ -12,9 +12,24 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "mineControl.h"
+#include "mineDisplay.h"
+#include "display.h"
+
+#define NUM_TILES   MINE_CONTROL_NUM_ROWS * MINE_CONTROL_NUM_COLS
 
 #define ALL_ROWS    uint8_t row = 0; row < MINE_CONTROL_NUM_ROWS; ++row
 #define ALL_COLUMNS uint8_t column = 0; column < MINE_CONTROL_NUM_COLS; ++column
+
+//states for the state machine
+enum mineControl_st_t {
+    init_st,
+    startText_st,
+    wait4Touch_st,
+    adcWait_st,
+
+};
+
+static enum mineControl_st_t mineControl_st;
 
 //the minefield
 static tile_t mineField[MINE_CONTROL_NUM_ROWS][MINE_CONTROL_NUM_COLS];
@@ -78,11 +93,19 @@ uint8_t mineControl_getThreatLvl(uint8_t x, uint8_t y) {
     return numMines;
 }
 
+//recursively reveals tiles
+void revealTiles(uint8_t x, uint8_t y) {
+    
+}
+
 
 //ADVERTISED FUNCTIONS
 
 //init funciton for the mineControl. Used before all other functions.
-void mineControl_init();
+void mineControl_init() {
+    mineDisplay_init();
+    mineControl_st = init_st;
+}
 
 //normal tickfunction for the mineSweeper game top level
 void mineControl_tick();
@@ -94,7 +117,7 @@ void mineControl_tick();
 
 
 
-
+//PROBABLY UNNEEDED FUNCTIONS
 
 //isMine(x,y,tile) takes an x/y postion on the field and returns a bool indicating weather the tile is a mine or not
 bool mineControl_isMine(uint8_t x, uint8_t y) {
