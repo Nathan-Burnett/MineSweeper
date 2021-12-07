@@ -1,0 +1,2 @@
+Topher todo:
+-find a place to seed the random number generator
