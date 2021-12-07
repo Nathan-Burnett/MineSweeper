@@ -95,9 +95,33 @@ uint8_t mineControl_getThreatLvl(uint8_t x, uint8_t y) {
 
 //recursively reveals tiles
 void revealTiles(uint8_t x, uint8_t y) {
+    // figures out the threat level
     uint8_t threat = mineControl_getThreatLvl(x,y);
 
+    //reveals the tile and marks it as revealed (so we don't recurse forever)
     mineDisplay_revealTile(x, y, threat);
+    mineField[x][y].isRevealed = true;
+
+    // if there's not a threat (lol) then reveal surrounding tiles
+    if (!threat) {
+        //reveal each row
+        for (int16_t row = x - 1; row <= x + 1; ++row) {
+            //checks to make sure it's not out of bounds
+            if (row < 0 || row >= MINE_CONTROL_NUM_ROWS) continue;
+            
+            //reveal each entry
+            for (int16_t column = y - 1; column <= y + 1; ++column) {
+
+                //checks to make sure it's in bounds
+                if (column < 0 || column >= MINE_CONTROL_NUM_COLS || (row == y && column == x)) continue;
+
+                //if it's not revealed, reveal it! (scary recursion :0)
+                if (!mineField[row][column].isRevealed) {
+                    revealTiles(column, row);
+                }
+            }
+        }
+    }
 }
 
 //reveals all mines with a red background behind the one pressed
