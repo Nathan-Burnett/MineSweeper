@@ -1,23 +1,18 @@
+/**
+ * @file mineControl.c
+ * @author Topher Johnson
+ * @version 0.1
+ * @date 2021-12-06
+ * 
+ */
+
+
 #include <stdio.h>
 #include <stdint.h>
-#include <stdbool.h>
+#include "mineControl.h"
 
-#ifndef MINE_CONTROL_H_
-#define MINE_CONTROL_H_
-
-#define MINE_CONTROL_NUM_ROWS 10
-#define MINE_CONTROL_NUM_COLS 10
-
-
-//The game is made of this field that is consisted of rows and colums of tiles that can either
-//be a mine or an empty place.
-typedef struct 
-{
-    bool isRevealed; //bool to check weather the tile has been selected and shown
-    bool isMine; //bool to check weather tile is a mine
-    bool isFlagged; //bool to check weather the tile is flagged^
-
-}tile_t;
+//the minefield
+static tile_t mineField[MINE_CONTROL_NUM_COLS][MINE_CONTROL_NUM_ROWS];
 
 //init funciton for the mineControl. Used before all other functions.
 void mineControl_init();
@@ -36,7 +31,3 @@ bool mineControl_isMine(uint8_t x, uint8_t y, tile_t tile);
 
 //sets a specific tile to be a flag
 void mineControl_setFlag(tile_t tile);
-
-
-
-#endif /*mine_control.h*/
