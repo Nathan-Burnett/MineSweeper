@@ -95,9 +95,12 @@ uint8_t mineControl_getThreatLvl(uint8_t x, uint8_t y) {
 
 //recursively reveals tiles
 void revealTiles(uint8_t x, uint8_t y) {
-    
+    uint8_t threat = mineControl_getThreatLvl(x,y);
+
+    mineDisplay_revealTile(x, y, threat);
 }
 
+//reveals all mines with a red background behind the one pressed
 
 //ADVERTISED FUNCTIONS
 

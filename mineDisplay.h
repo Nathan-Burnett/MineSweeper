@@ -15,7 +15,7 @@ void mineDisplay_drawBoard();
 void mineDisplay_drawMine(uint8_t x, uint8_t y, bool redBackground);
 
 // draws the tile with its threat level or nothing or a mine. Which ever applies
-void mineDisplay_revealTile(uint8_t x, uint8_t y, tile_t tile, uint8_t theatLvl);
+void mineDisplay_revealTile(uint8_t x, uint8_t y, uint8_t theatLvl);
 
 
 
