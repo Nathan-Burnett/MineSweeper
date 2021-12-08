@@ -17,8 +17,8 @@
 #define FINAL_STAGE 2
 
 // uncomment which section of the main could should be ran
-#define RUN_TEST
-//#define RUN_FINAL
+//#define RUN_PROGRAM RUN_TEST
+//#define RUN_PROGRAM RUN_FINAL
 
 #ifndef RUN_PROGRAM
 #define RUN_TEST
