@@ -39,6 +39,6 @@ bool mineControl_isMine(uint8_t x, uint8_t y);
 //sets a specific tile to be a flag
 void mineControl_setFlag(uint8_t x, uint8_t y);
 
-
+void setMines();
 
 #endif /*mine_control.h*/

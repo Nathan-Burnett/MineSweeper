@@ -25,14 +25,20 @@
 enum mineControl_st_t {
     init_st,
     startText_st,
+    wait4FirstTouch_st,
     wait4Touch_st,
     adcWait_st,
     processTouch_st,
+    mineExploded_st,
     
-
 };
 
+//current state
 static enum mineControl_st_t currentState;
+
+//variable to help keep track of tiles
+static uint16_t revealedTiles;
+static uint16_t flaggedTiles;
 
 //the minefield
 static tile_t mineField[MINE_CONTROL_NUM_ROWS][MINE_CONTROL_NUM_COLS];
@@ -41,6 +47,8 @@ static tile_t mineField[MINE_CONTROL_NUM_ROWS][MINE_CONTROL_NUM_COLS];
 
 //clears the field
 void clearField() {
+    revealedTiles = 0;
+    flaggedTiles = 0;
     //for each row
     for (ALL_ROWS) {
         //for each entry in each row
@@ -61,7 +69,7 @@ void setMines() {
         uint8_t randRow = rand() % MINE_CONTROL_NUM_ROWS;
 
         //tests to see if there's a mine already
-        if (mineField[randRow][randColumn].isMine) {
+        if (!mineField[randRow][randColumn].isMine) {
             mineField[randRow][randColumn].isMine = true;
         }
         //if there is, add another iteration
@@ -69,7 +77,6 @@ void setMines() {
             --i;
         }
     }
-
 }
 
 // getThreatLvl(x,y) takes a x and y postion on the field and checks the threat level of that tile
@@ -98,6 +105,7 @@ uint8_t mineControl_getThreatLvl(uint8_t x, uint8_t y) {
 
 //recursively reveals tiles
 void revealTiles(uint8_t x, uint8_t y) {
+    ++revealedTiles;
     // figures out the threat level
     uint8_t threat = mineControl_getThreatLvl(x,y);
 
@@ -157,6 +165,13 @@ void mineControl_tick() {
                 clearField();
                 setMines();
                 srand(timer);
+                revealedTiles = 0;
+            }
+            break;
+        case wait4FirstTouch_st:
+
+            if (display_isTouched()) {
+
             }
             break;
         case wait4Touch_st:
