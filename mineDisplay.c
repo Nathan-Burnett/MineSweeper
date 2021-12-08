@@ -13,33 +13,37 @@
 
 
 //text sizes for the various needs
-#define TEXT_SIZE 2
+#define TEXT_SIZE       2
 #define INSTUCTION_SIZE 1
-#define TITLE_TXT_SIZE 3
+#define TITLE_TXT_SIZE  3
 //title define values
-#define TITLE_CURSOR_X 65
-#define TITLE_CURSOR_Y 80
-#define TITLE_MSG "MINESWEEPER"
+#define TITLE_CURSOR_X  65
+#define TITLE_CURSOR_Y  80
+#define TITLE_MSG       "MINESWEEPER"
 //Start message define values
-#define START_CURSOR_X 78
-#define START_CURSOR_Y 160
-#define START_MSG "Press to Start"
+#define START_CURSOR_X  78
+#define START_CURSOR_Y  160
+#define START_MSG       "Press to Start"
 //flag and press message define values
-#define FLAG_MSG "Long press to place and remove flag"
-#define PRESS_MSG "Tap tile to uncover safe tiles"
-#define FLAG_CURSOR_X 60
-#define FLAG_CURSOR_Y 120
-#define PRESS_CURSOR_X 70
-#define PRESS_CURSOR_Y 130
+#define FLAG_MSG        "Long press to place and remove flag"
+#define PRESS_MSG       "Tap tile to uncover safe tiles"
+#define FLAG_CURSOR_X   60
+#define FLAG_CURSOR_Y   120
+#define PRESS_CURSOR_X  70
+#define PRESS_CURSOR_Y  130
+#define WIN_MSG         "You win!"
+#define WIN_MSG_X       (DISPLAY_WIDTH - TITLE_TXT_SIZE * DISPLAY_CHAR_WIDTH) / 2
+#define WIN_MSG_Y       (DISPLAY_HEIGHT - TITLE_TXT_SIZE * DISPLAY_CHAR_WIDTH) / 2
+#define WIN_MSG_BCKGND  DISPLAY_WHITE
 
 
-#define NUM_COL       MINE_CONTROL_NUM_COLS
-#define NUM_ROW       MINE_CONTROL_NUM_ROWS
-#define ROW_HEIGHT    (DISPLAY_HEIGHT / NUM_ROW)
-#define COLUMN_WIDTH  (DISPLAY_WIDTH / NUM_COL)
-#define CHAR_OFFSET_X ((COLUMN_WIDTH-(DISPLAY_CHAR_WIDTH-1)*TEXT_SIZE)/2)
-#define CHAR_OFFSET_Y ((ROW_HEIGHT-DISPLAY_CHAR_WIDTH*TEXT_SIZE)/2)
-#define SCREEN_EDGE 0
+#define NUM_COL         MINE_CONTROL_NUM_COLS
+#define NUM_ROW         MINE_CONTROL_NUM_ROWS
+#define ROW_HEIGHT      (DISPLAY_HEIGHT / NUM_ROW)
+#define COLUMN_WIDTH    (DISPLAY_WIDTH / NUM_COL)
+#define CHAR_OFFSET_X   ((COLUMN_WIDTH-(DISPLAY_CHAR_WIDTH-1)*TEXT_SIZE)/2)
+#define CHAR_OFFSET_Y   ((ROW_HEIGHT-DISPLAY_CHAR_WIDTH*TEXT_SIZE)/2)
+#define SCREEN_EDGE     0
 
 #define FLAG_CHAR 'F'
 #define MINE_CHAR 'M'
@@ -134,3 +138,15 @@ void mineDisplay_drawFlaggedDirt(uint8_t x, uint8_t y) {
     display_printChar('X');
 }
 
+//draws a "You win!" that would make graphic designers cry
+void mineDisplay_drawWinText() {
+    display_setTextColorBg(DISPLAY_BLUE, WIN_MSG_BCKGND);
+    display_setTextSize(TITLE_TXT_SIZE);
+    display_setCursor(WIN_MSG_X,WIN_MSG_Y);
+    display_println(WIN_MSG);
+}
+
+//clears the screen after a game
+void mineDisplay_clearScreen() {
+    display_fillScreen(BACKGROUND_COLOR);
+}

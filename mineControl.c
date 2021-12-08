@@ -21,16 +21,20 @@
 #define ALL_ROWS    uint8_t row = 0; row < MINE_CONTROL_NUM_ROWS; ++row
 #define ALL_COLUMNS uint8_t column = 0; column < MINE_CONTROL_NUM_COLS; ++column
 
+#define PLANT   false
+#define REMOVE  true
+#define DRAW    false
+#define ERASE   true
+
 //states for the state machine
 enum mineControl_st_t {
     init_st,
     startText_st,
     wait4FirstTouch_st,
     wait4Touch_st,
-    adcWait_st,
-    processTouch_st,
     mineExploded_st,
-    
+    winText_st,
+    clearBoard_st
 };
 //current state
 static enum mineControl_st_t currentState;
@@ -161,12 +165,29 @@ void plantFakeMines(uint8_t x, uint8_t y, bool remove) {
     
 }
 
+void drawMines(uint8_t x, uint8_t y) {
+    mineDisplay_drawMine(x,y,true);
+    //draws the mines in the field
+    for (ALL_COLUMNS) {
+        //each entry in each column
+        for (ALL_ROWS) {
+            //if it's a mine, draw it
+            if (mineField[row][column].isMine) {
+                if (!mineField[row][column].isFlagged)
+                    mineDisplay_drawMine(column,row,false);
+            }
+            else if (mineField[row][column].isFlagged) {
+                mineDisplay_drawFlaggedDirt(column,row);
+            }
+        }
+    }
+}
+
 //ADVERTISED FUNCTIONS
 
 //init funciton for the mineControl. Used before all other functions.
 void mineControl_init() {
     mineDisplay_init();
-    touchHandler_init();
     currentState = init_st;
 }
 
@@ -178,29 +199,101 @@ void mineControl_tick() {
     switch(currentState) {
         case init_st:
             currentState = startText_st;
+            mineDisplay_drawGameStart(DRAW);
             timer = 0;
             break;
         case startText_st:
 
             if (display_isTouched()) {
                 display_clearOldTouchData();
-                currentState = wait4Touch_st;
+                mineDisplay_drawGameStart(ERASE);
+                //starting the game!
+                currentState = wait4FirstTouch_st;
                 mineDisplay_drawBoard();
                 clearField();
-                setMines();
                 srand(timer);
                 revealedTiles = 0;
+                touchHandler_enable();
             }
             break;
         case wait4FirstTouch_st:
+            //if we detect a release, it's go time. 
+            if (touchHandler_releaseDetected()) {
+                touchHandler_disable();
+                int8_t row, column;
+                touchHandler_getTouchedRowColumn(&row, &column);
 
-            if (display_isTouched()) {
-
+                //if there's a flag remove the flag
+                if (mineField[row][column].isFlagged) {
+                    mineField[row][column].isFlagged = false;
+                    mineDisplay_drawFlag(column, row, REMOVE);
+                }
+                else {
+                    plantFakeMines(column, row, PLANT);
+                    setMines();
+                    plantFakeMines(column, row, REMOVE);
+                    revealTiles(column, row);
+                    currentState = wait4Touch_st;
+                }
+                touchHandler_enable();                
             }
             break;
         case wait4Touch_st:
+            if (touchHandler_releaseDetected) {
+                touchHandler_disable();
+                int8_t row, column;
+                touchHandler_getTouchedRowColumn(&row, &column);
+
+                // if it's revealed already
+                if (mineField[row][column].isRevealed) {
+                    //do nothing
+                }
+                //if there's a flag 
+                else if (mineField[row][column].isFlagged) {
+                    //remove the flag
+                    mineField[row][column].isFlagged = false;
+                    mineDisplay_drawFlag(column, row, REMOVE);
+                    touchHandler_enable();
+                }
+                //if there's a mine
+                else if (mineField[row][column].isMine) {
+                    //oops, hit a mine. 
+                    currentState = mineExploded_st;
+                    drawMines(column, row);
+                }
+                //if it's an unrevealed, unflagged, non-mine tile
+                else {
+                    revealTiles(column, row);
+                    //if we're out of non-mine tiles
+                    if (revealedTiles == NUM_TILES - MINE_CONTROL_NUM_MINES) {
+                        //yo you win
+                        currentState = winText_st;
+                        mineDisplay_drawWinText();
+                    }
+                    else {
+                        //stay in the same state
+                        touchHandler_enable();
+                    }
+                }
+            }
             break;
-        case adcWait_st:
+        case mineExploded_st:
+            //if it's touched, move on
+            if (display_isTouched()) {
+                display_clearOldTouchData();
+                currentState = clearBoard_st;
+            }
+            break;
+        case winText_st:
+            //if it's touched, move on
+            if (display_isTouched()) {
+                display_clearOldTouchData();
+                currentState = clearBoard_st;
+            }        
+            break;
+        case clearBoard_st:
+            currentState = startText_st;
+            mineDisplay_drawGameStart(DRAW);
             break;
         default:
             break;
@@ -213,9 +306,38 @@ void mineControl_tick() {
         case startText_st:
             ++timer;
             break;
-        case wait4Touch_st:
+        case wait4FirstTouch_st:
+            //if this is true, this idiot wants to draw a flag. 
+            if (touchHandler_isComplete()) {
+                touchHandler_disable();
+                int8_t row, column;
+                touchHandler_getTouchedRowColumn(&row, &column);
+                mineDisplay_drawFlag(column, row, PLANT);
+                touchHandler_enable();
+            }
             break;
-        case adcWait_st:
+        case wait4Touch_st:
+            //let's draw a flag!
+            if (touchHandler_isComplete()) {
+                touchHandler_disable();
+                int8_t row, column;
+                touchHandler_getTouchedRowColumn(&row, &column);
+                
+                //if it's flagged
+                if (mineField[row][column].isFlagged) {
+                    //remove the flag
+                    mineDisplay_drawFlag(column, row, REMOVE);
+                }
+                // if it's not revealed
+                else if (!mineField[row][column].isRevealed) {
+                    mineDisplay_drawFlag(column, row, PLANT);
+                }
+                //otherwise it's revealed so we don't want to do anything
+                touchHandler_enable();
+            }            
+            break;
+        case clearBoard_st:
+            mineDisplay_clearScreen();
             break;
         default:
             break;

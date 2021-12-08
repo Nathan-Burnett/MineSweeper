@@ -77,6 +77,7 @@ void touchHandler_tick() {
     case waitingForTouch_st:
         // if it's touched, move to the adc timer state
         if (display_isTouched()) {
+            display_clearOldTouchData();
             currentState = adcTimerRunning_st;
         }
         break;
