@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include "mineControl.h"
 #include "mineDisplay.h"
+#include "touchHandler.h"
 #include "display.h"
 
 #define NUM_TILES   MINE_CONTROL_NUM_ROWS * MINE_CONTROL_NUM_COLS
@@ -26,10 +27,12 @@ enum mineControl_st_t {
     startText_st,
     wait4Touch_st,
     adcWait_st,
+    processTouch_st,
+    
 
 };
 
-static enum mineControl_st_t mineControl_st;
+static enum mineControl_st_t currentState;
 
 //the minefield
 static tile_t mineField[MINE_CONTROL_NUM_ROWS][MINE_CONTROL_NUM_COLS];
@@ -98,7 +101,7 @@ void revealTiles(uint8_t x, uint8_t y) {
     // figures out the threat level
     uint8_t threat = mineControl_getThreatLvl(x,y);
 
-    //reveals the tile and marks it as revealed (so we don't recurse forever)
+    //reveals the tile and marks it as revealed (so we don't recurse)
     mineDisplay_revealTile(x, y, threat);
     mineField[x][y].isRevealed = true;
 
@@ -131,11 +134,54 @@ void revealTiles(uint8_t x, uint8_t y) {
 //init funciton for the mineControl. Used before all other functions.
 void mineControl_init() {
     mineDisplay_init();
-    mineControl_st = init_st;
+    touchHandler_init();
+    currentState = init_st;
 }
 
 //normal tickfunction for the mineSweeper game top level
-void mineControl_tick();
+void mineControl_tick() {
+    static uint16_t timer = 0;
+
+    // switch state for transition
+    switch(currentState) {
+        case init_st:
+            currentState = startText_st;
+            timer = 0;
+            break;
+        case startText_st:
+
+            if (display_isTouched()) {
+                display_clearOldTouchData();
+                currentState = wait4Touch_st;
+                mineDisplay_drawBoard();
+                clearField();
+                setMines();
+                srand(timer);
+            }
+            break;
+        case wait4Touch_st:
+            break;
+        case adcWait_st:
+            break;
+        default:
+            break;
+    }
+
+    // action switch statement
+    switch(currentState) {
+        case init_st:
+            break;
+        case startText_st:
+            ++timer;
+            break;
+        case wait4Touch_st:
+            break;
+        case adcWait_st:
+            break;
+        default:
+            break;
+    }
+}
 
 
 

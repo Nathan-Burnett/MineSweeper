@@ -5,6 +5,13 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#define LINE_COLOR          DISPLAY_BLACK
+#define REVEALED_TILE_COLOR DISPLAY_GRAY
+#define BACKGROUND_COLOR    DISPLAY_LIGHT_GRAY
+#define FLAG_COLOR          DISPLAY_YELLOW
+#define MINE_COLOR          DISPLAY_BLACK
+
+
 //text sizes for the various needs
 #define TEXT_SIZE 2
 #define INSTUCTION_SIZE 1
@@ -26,76 +33,81 @@
 #define PRESS_CURSOR_Y 130
 
 
-#define COL_NUM MINE_CONTROL_NUM_COLS
-#define ROW_NUM MINE_CONTROL_NUM_ROWS
-#define GRID_ROW_POS (DISPLAY_HEIGHT/NUM_ROW)
-#define GRID_COL_POS (DISPLAY_WIDTH/NUM_COL
-#define CHAR_OFFSET_X ((GRID_COL_POS-(DISPLAY_CHAR_WIDTH-1)*TEXT_SIZE)/2)
-#define CHAR_OFFSET_Y ((GRID_ROW_POS-DISPLAY_CHAR_WIDTH*TEXT_SIZE)/2)
+#define NUM_COL       MINE_CONTROL_NUM_COLS
+#define NUM_ROW       MINE_CONTROL_NUM_ROWS
+#define ROW_HEIGHT    (DISPLAY_HEIGHT / NUM_ROW)
+#define COLUMN_WIDTH  (DISPLAY_WIDTH / NUM_COL)
+#define CHAR_OFFSET_X ((COLUMN_WIDTH-(DISPLAY_CHAR_WIDTH-1)*TEXT_SIZE)/2)
+#define CHAR_OFFSET_Y ((ROW_HEIGHT-DISPLAY_CHAR_WIDTH*TEXT_SIZE)/2)
 #define SCREEN_EDGE 0
 
 #define FLAG_CHAR 'F'
 #define MINE_CHAR 'M'
 
-
+const uint16_t numberColors[] = {REVEALED_TILE_COLOR, DISPLAY_BLUE, DISPLAY_RED, DISPLAY_GREEN, DISPLAY_DARK_BLUE, DISPLAY_DARK_RED, DISPLAY_DARK_CYAN, DISPLAY_BLACK, DISPLAY_DARK_GRAY};
 
 //init the main display and fills it with black screen
 void mineDisplay_init(){
     display_init();
-    display_fillScreen(DISPLAY_BLACK);
+    display_fillScreen(BACKGROUND_COLOR);
     return;
 }
 
+// helper function to fill tiles with a color!
+void fillTile(uint8_t x,uint8_t y,uint16_t color){
+    display_fillRect(COLUMN_WIDTH*x + 1,ROW_HEIGHT*y + 1,COLUMN_WIDTH - 1,ROW_HEIGHT - 1, color);
+    return;
+}
 
 //draws the minefield on the screen
 void mineDisplay_drawBoard(){
     //draws colums
-    for(uint8_t i = 1; i<COL_NUM; i++){
-        display_drawLine(GRID_COL_POS*i,SCREEN_EDGE,GRID_COL_POS*i,DISPLAY_HEIGHT,DISPLAY_WHITE);
+    for(uint8_t i = 1; i<NUM_COL; i++){
+        display_drawLine(COLUMN_WIDTH*i,SCREEN_EDGE,COLUMN_WIDTH*i,DISPLAY_HEIGHT,LINE_COLOR);
     }
     //draws rows
-    for(uint8_t i = 0; i<ROW_NUM;i++){
-        display_drawLine(SCREEN_EDGE,GRID_ROW_POS*i,DISPLAY_WIDTH,GRID_ROW_POS*i,DISPLAY_WHITE);
+    for(uint8_t i = 1; i<NUM_ROW;i++){
+        display_drawLine(SCREEN_EDGE,ROW_HEIGHT*i,DISPLAY_WIDTH,ROW_HEIGHT*i,LINE_COLOR);
     }
     return;
 }
 
-void mineDisplay_revealTile(uint8_t x, uint8_t y, uint8_t theatLvl){
-    display_setCursor((GRID_COL_POS*x)+CHAR_OFFSET_X,(GRID_ROW_POS*y)+CHAR_OFFSET_Y);
+void mineDisplay_revealTile(uint8_t x, uint8_t y, uint8_t threatLvl){
+    fillTile(x,y,REVEALED_TILE_COLOR);
+    display_setCursor((COLUMN_WIDTH*x)+CHAR_OFFSET_X,(ROW_HEIGHT*y)+CHAR_OFFSET_Y);
     display_setTextSize(TEXT_SIZE);
-    display_printChar(theatLvl);
+    display_setTextColor(numberColors[threatLvl]);
+    display_printDecimalInt(threatLvl);
     return;
 }
 
 void mineDisplay_drawFlag(uint8_t x,uint8_t y,bool erase){
     display_setTextSize(TEXT_SIZE);
-    display_setCursor((GRID_COL_POS*x)+CHAR_OFFSET_X,(GRID_ROW_POS*y)+CHAR_OFFSET_Y);
-    if (erase) display_setTextColor(DISPLAY_BLACK);
-    else display_setTextColor(DISPLAY_DARK_YELLOW);
+    display_setCursor((COLUMN_WIDTH*x)+CHAR_OFFSET_X,(ROW_HEIGHT*y)+CHAR_OFFSET_Y);
+    if (erase) display_setTextColor(BACKGROUND_COLOR);
+    else display_setTextColor(FLAG_COLOR);
     display_printChar(FLAG_CHAR);
-}
-
-void fillTile(uint8_t x,uint8_t y,uint16_t color){
-    display_fillRect(GRID_COL_POS*x,GRID_ROW_POS*y,GRID_ROW_POS,GRID_COL_POS, color);
-    return;
 }
 
 
 void mineDisplay_drawMine(uint8_t x, uint8_t y, bool redBackground){
+    display_setTextColor(DISPLAY_RED);
     // if the tile was chosen and is a bomb fill the background with red to indicate game over
     if(redBackground){
         fillTile(x,y,DISPLAY_RED);
-        return;
-    } 
+    }
+    else {
+        fillTile(x,y,REVEALED_TILE_COLOR);
+    }
     display_setTextSize(TEXT_SIZE);
-    display_setCursor((GRID_COL_POS*x)+CHAR_OFFSET_X,(GRID_ROW_POS*y)+CHAR_OFFSET_Y);
-    display_setTextColor(DISPLAY_RED);
+    display_setCursor((COLUMN_WIDTH*x)+CHAR_OFFSET_X,(ROW_HEIGHT*y)+CHAR_OFFSET_Y);
+    display_setTextColor(MINE_COLOR);    
     display_printChar(MINE_CHAR);
     return;
 }
 
 void mineDisplay_drawGameStart(bool erase){
-    if (erase) display_setTextColor(DISPLAY_BLACK);
+    if (erase) display_setTextColor(BACKGROUND_COLOR);
     else display_setTextColor(DISPLAY_BLUE);
 
     display_setTextSize(TITLE_TXT_SIZE);
@@ -115,4 +127,10 @@ void mineDisplay_drawGameStart(bool erase){
     return;
 }
 
+//draws a flagged piece of dirt once the game is over (red x in some versions)
+void mineDisplay_drawFlaggedDirt(uint8_t x, uint8_t y) {
+    display_setCursor((COLUMN_WIDTH*x)+CHAR_OFFSET_X,(ROW_HEIGHT*y)+CHAR_OFFSET_Y);
+    display_setTextColor(DISPLAY_RED);
+    display_printChar('X');
+}
 

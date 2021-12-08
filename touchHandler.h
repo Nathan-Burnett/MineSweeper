@@ -2,6 +2,7 @@
 #define TOUCH_HANDLER_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 //gets the touched region row and column 
 void touchHandler_getTouchedRowColumn(uint8_t *row, uint8_t *column);
