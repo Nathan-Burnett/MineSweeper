@@ -80,12 +80,14 @@ void touchHandler_tick() {
     case init_st:
         // if it's enabled, wait for a touch
         if (enable)
+            printf("entering waitingForTouch_st\n");
             currentState = waitingForTouch_st;
         break;
     case waitingForTouch_st:
         // if it's touched, move to the adc timer state
         if (display_isTouched()) {
             display_clearOldTouchData();
+            printf("entering adcTimerRunning_st\n");
             currentState = adcTimerRunning_st;
         }
         break;
@@ -101,17 +103,20 @@ void touchHandler_tick() {
             touchedRow = y / ROW_HEIGHT;
             touchedColumn = x / COL_WIDTH;
         }
+            printf("entering currentlyTouched_st\n");
         currentState = currentlyTouched_st;
         timer = 0;
         break;
     case currentlyTouched_st:
         // if the timer runs out, then move on
         if (timer == TOUCH_TIMER_MAX) {
+            printf("entering setFlag_st\n");
             currentState = setFlag_st;
         }
         // if the display isn't touched, change released to true
         if (!display_isTouched()) {
             released = true;
+            printf("entering final_st\n");
             currentState = final_st;
         }
         break;
@@ -122,11 +127,13 @@ void touchHandler_tick() {
         //wait for a release before moving to final_st
         if (!display_isTouched()) {
             display_clearOldTouchData();
+            printf("entering init_st\n");
             currentState = init_st;
         }
     case final_st:
         // This won't be called ever
         if (!enable) {
+            printf("entering init_st\n");
             currentState = init_st;
         }
         break;

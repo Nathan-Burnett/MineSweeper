@@ -177,7 +177,7 @@ void drawMines(uint8_t x, uint8_t y) {
                 if (!mineField[row][column].isFlagged)
                     mineDisplay_drawMine(column,row,false);
             }
-            else if (mineField[row][column].isFlagged) {
+            else if (mineField[row][column].isFlagged && !mineField[row][column].isRevealed) {
                 mineDisplay_drawFlaggedDirt(column,row);
             }
         }
