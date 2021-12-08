@@ -29,7 +29,7 @@
 #define TIMER_CLOCK_FREQUENCY (XPAR_CPU_CORTEXA9_0_CPU_CLK_FREQ_HZ / 2)
 #define TIMER_LOAD_VALUE ((CONFIG_TIMER_PERIOD * TIMER_CLOCK_FREQUENCY) - 1.0)
 #define TOTAL_SECONDS 50
-#define MAX_INTERUPT (INTERRUPS_PER_SECOND*TOTAL_SECONDS)
+#define MAX_INTERRUPT (INTERRUPTS_PER_SECOND*TOTAL_SECONDS)
 
 //variable to keep track of the isr function count
 uint32_t isr_functionCallCount = 0;
@@ -70,7 +70,7 @@ int main() {
         }
         interrupts_disableArmInts();
         printf("isr function call count: %d\n",interrupts_isrInvocationCount());
-        printf("personal interrupt count: %d\n", personalInterruptCount);
+        printf("personal interrupt count: %d\n", personalIsrCount);
 
         return 0;
 
