@@ -32,16 +32,25 @@ enum mineControl_st_t {
     mineExploded_st,
     
 };
-
 //current state
 static enum mineControl_st_t currentState;
+
+//The game is made of this field that is consisted of rows and colums of tiles that can either
+//be a mine or an empty place.
+typedef struct 
+{
+    bool isRevealed; //bool to check weather the tile has been selected and shown
+    bool isMine; //bool to check weather tile is a mine
+    bool isFlagged; //bool to check weather the tile is flagged^
+
+}tile_t;
+//the minefield
+static tile_t mineField[MINE_CONTROL_NUM_ROWS][MINE_CONTROL_NUM_COLS];
 
 //variable to help keep track of tiles
 static uint16_t revealedTiles;
 static uint16_t flaggedTiles;
 
-//the minefield
-static tile_t mineField[MINE_CONTROL_NUM_ROWS][MINE_CONTROL_NUM_COLS];
 
 //HELPER FUNCTIONS
 
@@ -80,7 +89,7 @@ void setMines() {
 }
 
 // getThreatLvl(x,y) takes a x and y postion on the field and checks the threat level of that tile
-uint8_t mineControl_getThreatLvl(uint8_t x, uint8_t y) {
+uint8_t getThreatLvl(uint8_t x, uint8_t y) {
     //variable to count how many mines are surronding the tile
     uint8_t numMines = 0;
 
@@ -107,7 +116,7 @@ uint8_t mineControl_getThreatLvl(uint8_t x, uint8_t y) {
 void revealTiles(uint8_t x, uint8_t y) {
     ++revealedTiles;
     // figures out the threat level
-    uint8_t threat = mineControl_getThreatLvl(x,y);
+    uint8_t threat = getThreatLvl(x,y);
 
     //reveals the tile and marks it as revealed (so we don't recurse)
     mineDisplay_revealTile(x, y, threat);
@@ -135,7 +144,22 @@ void revealTiles(uint8_t x, uint8_t y) {
     }
 }
 
-//reveals all mines with a red background behind the one pressed
+//plants sets isMine to true for mines around where the user initially touches so setMines won't 
+void plantFakeMines(uint8_t x, uint8_t y, bool remove) {
+
+    //do all the columns
+    for (uint8_t column = x - 1; column < x + 1; ++column) {
+        //out of bounds check
+        if (column >= MINE_CONTROL_NUM_COLS || column < 0) continue;
+        //and all the rows
+        for (uint8_t row = y - 1; row < y + 1; ++row) {
+            //out of bounds check
+            if (row >= MINE_CONTROL_NUM_ROWS || row < 0) continue;
+            mineField[row][column].isMine = !remove;
+        }
+    }
+    
+}
 
 //ADVERTISED FUNCTIONS
 
@@ -197,28 +221,3 @@ void mineControl_tick() {
             break;
     }
 }
-
-
-
-
-
-
-
-
-//PROBABLY UNNEEDED FUNCTIONS
-
-//isMine(x,y,tile) takes an x/y postion on the field and returns a bool indicating weather the tile is a mine or not
-bool mineControl_isMine(uint8_t x, uint8_t y) {
-    return mineField[x][y].isMine;
-}
-
-//sets a specific tile to be a flag
-void mineControl_setFlag(uint8_t x, uint8_t y) {
-    mineField[x][y].isFlagged = true;
-}
-
-//isRevealed(x,y,tile) takes an x and y postion on the field and returns a bool indicating weather the tile has already be selected
-bool mineControl_isRevealed(uint8_t x, uint8_t y) {
-    return mineField[x][y].isRevealed;
-}
-

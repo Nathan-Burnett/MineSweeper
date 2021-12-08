@@ -5,9 +5,8 @@
 int main() {
     mineDisplay_init();
 
-    srand(12);
     mineDisplay_drawBoard();
-    setMines();
+    for (uint8_t i = 0; i < 9; ++i) mineDisplay_revealTile(i, 0 , i);
 
     return 0;
 }
