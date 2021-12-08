@@ -1,2 +1,2 @@
 Topher todo:
--find a place to seed the random number generator
+make sure to init all sm's
