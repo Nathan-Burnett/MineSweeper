@@ -98,15 +98,15 @@ uint8_t getThreatLvl(uint8_t x, uint8_t y) {
     uint8_t numMines = 0;
 
     //checks each row
-    for (int16_t row = x - 1; row <= x + 1; ++row) {
+    for (int16_t row = y - 1; row <= y + 1; ++row) {
         //checks to make sure it's not out of bounds
-        if (row < 0 || row >= MINE_CONTROL_NUM_ROWS) continue;
+        if (row >= MINE_CONTROL_NUM_ROWS || row < 0) continue;
         
         //checks each entry
-        for (int16_t column = y - 1; column <= y + 1; ++column) {
+        for (int16_t column = x - 1; column <= x + 1; ++column) {
 
             //checks to make sure it's in bounds
-            if (column < 0 || column >= MINE_CONTROL_NUM_COLS) continue;
+            if (column >= MINE_CONTROL_NUM_COLS || column < 0) continue;
             
             //if there's a mine, increase the mine count
             if (mineField[row][column].isMine) ++numMines;
@@ -124,20 +124,20 @@ void revealTiles(uint8_t x, uint8_t y) {
 
     //reveals the tile and marks it as revealed (so we don't recurse)
     mineDisplay_revealTile(x, y, threat);
-    mineField[x][y].isRevealed = true;
+    mineField[y][x].isRevealed = true;
 
     // if there's not a threat (lol) then reveal surrounding tiles
     if (!threat) {
         //reveal each row
-        for (int16_t row = x - 1; row <= x + 1; ++row) {
+        for (int16_t row = y - 1; row <= y + 1; ++row) {
             //checks to make sure it's not out of bounds
-            if (row < 0 || row >= MINE_CONTROL_NUM_ROWS) continue;
+            if (row >= MINE_CONTROL_NUM_ROWS || row < 0) continue;
             
             //reveal each entry
-            for (int16_t column = y - 1; column <= y + 1; ++column) {
+            for (int16_t column = x - 1; column <= x + 1; ++column) {
 
                 //checks to make sure it's in bounds
-                if (column < 0 || column >= MINE_CONTROL_NUM_COLS || (row == y && column == x)) continue;
+                if (column >= MINE_CONTROL_NUM_COLS || (row == y && column == x) || column < 0) continue;
 
                 //if it's not revealed, reveal it! (scary recursion :0)
                 if (!mineField[row][column].isRevealed) {
@@ -152,11 +152,11 @@ void revealTiles(uint8_t x, uint8_t y) {
 void plantFakeMines(uint8_t x, uint8_t y, bool remove) {
 
     //do all the columns
-    for (uint8_t column = x - 1; column < x + 1; ++column) {
+    for (int16_t column = x - 1; column <= x + 1; ++column) {
         //out of bounds check
         if (column >= MINE_CONTROL_NUM_COLS || column < 0) continue;
         //and all the rows
-        for (uint8_t row = y - 1; row < y + 1; ++row) {
+        for (int16_t row = y - 1; row <= y + 1; ++row) {
             //out of bounds check
             if (row >= MINE_CONTROL_NUM_ROWS || row < 0) continue;
             mineField[row][column].isMine = !remove;
@@ -171,6 +171,7 @@ void drawMines(uint8_t x, uint8_t y) {
     for (ALL_COLUMNS) {
         //each entry in each column
         for (ALL_ROWS) {
+            if (row == y && column == x) continue;
             //if it's a mine, draw it
             if (mineField[row][column].isMine) {
                 if (!mineField[row][column].isFlagged)
@@ -220,7 +221,7 @@ void mineControl_tick() {
             //if we detect a release, it's go time. 
             if (touchHandler_releaseDetected()) {
                 touchHandler_disable();
-                int8_t row, column;
+                uint8_t row, column;
                 touchHandler_getTouchedRowColumn(&row, &column);
 
                 //if there's a flag remove the flag
@@ -235,11 +236,12 @@ void mineControl_tick() {
                     revealTiles(column, row);
                     currentState = wait4Touch_st;
                 }
-                touchHandler_enable();                
+                display_clearOldTouchData();
+                touchHandler_enable();
             }
             break;
         case wait4Touch_st:
-            if (touchHandler_releaseDetected) {
+            if (touchHandler_releaseDetected()) {
                 touchHandler_disable();
                 int8_t row, column;
                 touchHandler_getTouchedRowColumn(&row, &column);
@@ -307,19 +309,9 @@ void mineControl_tick() {
             ++timer;
             break;
         case wait4FirstTouch_st:
-            //if this is true, this idiot wants to draw a flag. 
-            if (touchHandler_isComplete()) {
-                touchHandler_disable();
-                int8_t row, column;
-                touchHandler_getTouchedRowColumn(&row, &column);
-                mineDisplay_drawFlag(column, row, PLANT);
-                touchHandler_enable();
-            }
-            break;
         case wait4Touch_st:
             //let's draw a flag!
-            if (touchHandler_isComplete()) {
-                touchHandler_disable();
+            if (touchHandler_isTimedOut()) {
                 int8_t row, column;
                 touchHandler_getTouchedRowColumn(&row, &column);
                 
@@ -327,13 +319,14 @@ void mineControl_tick() {
                 if (mineField[row][column].isFlagged) {
                     //remove the flag
                     mineDisplay_drawFlag(column, row, REMOVE);
+                    mineField[row][column].isFlagged = false;
                 }
                 // if it's not revealed
                 else if (!mineField[row][column].isRevealed) {
                     mineDisplay_drawFlag(column, row, PLANT);
+                    mineField[row][column].isFlagged = true;
                 }
                 //otherwise it's revealed so we don't want to do anything
-                touchHandler_enable();
             }            
             break;
         case clearBoard_st:

@@ -1,2 +1,2 @@
 Topher todo:
-make sure to init all sm's
+find problem where threatlevel isn't working right - might have something to do with left and top edges

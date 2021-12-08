@@ -10,6 +10,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include "interrupts.h"
+#include "time.h"
+#include "touchHandler.h"
 
 #define TEST_MSG "Running Test portion of main"
 
@@ -18,17 +21,17 @@
 
 // uncomment which section of the main could should be ran
 //#define RUN_PROGRAM TEST_STAGE
-//#define RUN_PROGRAM FINAL_STAGE
+#define RUN_PROGRAM FINAL_STAGE
 
 #ifndef RUN_PROGRAM
 #define RUN_PROGRAM TEST_STAGE
 #endif
 
-
+#define TIMER_CLOCK_FREQUENCY (XPAR_CPU_CORTEXA9_0_CPU_CLK_FREQ_HZ / 2)
 #define INTERRUPTS_PER_SECOND (1.0/CONFIG_TIMER_PERIOD)
 #define TIMER_LOAD_VALUE ((CONFIG_TIMER_PERIOD * TIMER_CLOCK_FREQUENCY) - 1.0)
-#define TOTAL_SECONDS 50
-#define MAX_INTERUPT (INTERRUPS_PER_SECOND*TOTAL_SECONDS)
+#define TOTAL_SECONDS 200
+#define MAX_INTERRUPT_COUNT (INTERRUPTS_PER_SECOND*TOTAL_SECONDS)
 
 //variable to keep track of the isr function count
 uint32_t isr_functionCallCount = 0;
@@ -69,7 +72,7 @@ int main() {
         }
         interrupts_disableArmInts();
         printf("isr function call count: %d\n",interrupts_isrInvocationCount());
-        printf("personal interrupt count: %d\n", personalInterruptCount);
+        printf("personal interrupt count: %d\n", personalIsrCount);
 
         return 0;
 

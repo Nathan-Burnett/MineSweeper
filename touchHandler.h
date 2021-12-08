@@ -17,7 +17,7 @@ void touchHandler_disable();
 bool touchHandler_releaseDetected();
 
 //lets us know the touchhandler is over
-bool touchHandler_isComplete();
+bool touchHandler_isTimedOut();
 
 //inits the SM
 void touchHandler_init();

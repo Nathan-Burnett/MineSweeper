@@ -17,7 +17,7 @@
 #define ROW_HEIGHT  (DISPLAY_HEIGHT / MINE_CONTROL_NUM_ROWS)
 #define COL_WIDTH   (DISPLAY_WIDTH / MINE_CONTROL_NUM_COLS)
 
-#define TOUCH_TIMER_MAX     10
+#define TOUCH_TIMER_MAX     4
 
 // states for buttonhandler
 enum touchHandler_st_t {
@@ -25,6 +25,8 @@ enum touchHandler_st_t {
   waitingForTouch_st,  // waiting for touch
   adcTimerRunning_st,  // waiting for adc to settle
   currentlyTouched_st, // waiting for release
+  timerExpired_st,     // waiting for release
+  setFlag_st,
   final_st             // waiting for disable()
 };
 
@@ -55,13 +57,19 @@ void touchHandler_disable() {
 bool touchHandler_releaseDetected() { return released; }
 
 //lets us know the touchhandler is over
-bool touchHandler_isComplete() { return currentState == final_st; }
+bool touchHandler_isTimedOut() { 
+    if (currentState == setFlag_st) {
+        currentState = timerExpired_st;
+        return true;
+    }
+    else return false;
+}
 
 //inits the SM
 void touchHandler_init() {
     enable = false;
     released = false;
-    currentState = false;
+    currentState = init_st;
 }
 
 //tick function
@@ -99,7 +107,7 @@ void touchHandler_tick() {
     case currentlyTouched_st:
         // if the timer runs out, then move on
         if (timer == TOUCH_TIMER_MAX) {
-            currentState = final_st;
+            currentState = setFlag_st;
         }
         // if the display isn't touched, change released to true
         if (!display_isTouched()) {
@@ -107,6 +115,15 @@ void touchHandler_tick() {
             currentState = final_st;
         }
         break;
+    case setFlag_st:
+        //do nothing. wait for this to be changed in isTimedOut
+        break;
+    case timerExpired_st:
+        //wait for a release before moving to final_st
+        if (!display_isTouched()) {
+            display_clearOldTouchData();
+            currentState = init_st;
+        }
     case final_st:
         // This won't be called ever
         if (!enable) {
@@ -119,16 +136,8 @@ void touchHandler_tick() {
 
     // Performs state action next
     switch (currentState) {
-    case init_st:
-        break;
-    case waitingForTouch_st:
-        break;
-    case adcTimerRunning_st:
-        break;
     case currentlyTouched_st:
         ++timer;
-        break;
-    case final_st:
         break;
     default:
         break;
