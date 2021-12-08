@@ -71,6 +71,8 @@ int main() {
         printf("personal interrupt count: %d\n", personalInterruptCount);
 
         return 0;
+        
+    #endif
 }
 
 void isr_function() {
