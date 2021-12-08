@@ -3,7 +3,7 @@
 #include "config.h"
 #include "display.h"
 #include "leds.h"
-#include "util.h"
+#include "utils.h"
 #include "xparameters.h"
 
 #include <stdlib.h>
@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include TEST_MSG "Running Test portion of main"
+#define TEST_MSG "Running Test portion of main"
 
 #define TEST_STAGE 1
 #define FINAL_STAGE 2
@@ -25,9 +25,10 @@
 #endif
 
 
-#include INTERRUPTS_PER_SECOND (1.0/CONFIG_TIMER_PERIOD)
-#include TOTAL_SECONDS 50
-#include MAX_INTERUPT (INTERRUPS_PER_SECOND*TOTAL_SECONDS)
+#define INTERRUPTS_PER_SECOND (1.0/CONFIG_TIMER_PERIOD)
+#define TIMER_LOAD_VALUE ((CONFIG_TIMER_PERIOD * TIMER_CLOCK_FREQUENCY) - 1.0)
+#define TOTAL_SECONDS 50
+#define MAX_INTERUPT (INTERRUPS_PER_SECOND*TOTAL_SECONDS)
 
 //variable to keep track of the isr function count
 uint32_t isr_functionCallCount = 0;
@@ -71,7 +72,7 @@ int main() {
         printf("personal interrupt count: %d\n", personalInterruptCount);
 
         return 0;
-        
+
     #endif
 }
 
