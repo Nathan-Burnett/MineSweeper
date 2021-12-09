@@ -248,7 +248,7 @@ void mineControl_tick() {
 
                 // if it's revealed already
                 if (mineField[row][column].isRevealed) {
-                    //do nothing
+                    touchHandler_enable();
                 }
                 //if there's a flag 
                 else if (mineField[row][column].isFlagged) {

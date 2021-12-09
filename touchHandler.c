@@ -79,8 +79,9 @@ void touchHandler_tick() {
     switch (currentState) {
     case init_st:
         // if it's enabled, wait for a touch
-        if (enable)
+        if (enable) {
             currentState = waitingForTouch_st;
+        }
         break;
     case waitingForTouch_st:
         // if it's touched, move to the adc timer state
