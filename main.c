@@ -31,8 +31,8 @@
 #define INTERRUPTS_PER_SECOND (1.0/CONFIG_TIMER_PERIOD)
 #define TIMER_CLOCK_FREQUENCY (XPAR_CPU_CORTEXA9_0_CPU_CLK_FREQ_HZ / 2)
 #define TIMER_LOAD_VALUE ((CONFIG_TIMER_PERIOD * TIMER_CLOCK_FREQUENCY) - 1.0)
-#define TOTAL_SECONDS 400
-#define MAX_INTERRUPT_COUNT (INTERRUPTS_PER_SECOND*TOTAL_SECONDS)
+// #define TOTAL_SECONDS 400
+// #define MAX_INTERRUPT_COUNT (INTERRUPTS_PER_SECOND*TOTAL_SECONDS)
 
 //variable to keep track of the isr function count
 uint32_t isr_functionCallCount = 0;
@@ -67,7 +67,7 @@ int main() {
                 mineControl_tick();
                 touchHandler_tick();
                 interrupts_isrFlagGlobal = 0;
-                if(personalIsrCount >= MAX_INTERRUPT_COUNT)break;
+                // if(personalIsrCount >= MAX_INTERRUPT_COUNT)break;
                 utils_sleep();
             }
         }

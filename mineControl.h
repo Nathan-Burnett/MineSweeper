@@ -5,10 +5,10 @@
 #ifndef MINE_CONTROL_H_
 #define MINE_CONTROL_H_
 
-#define MINE_CONTROL_NUM_ROWS 10
-#define MINE_CONTROL_NUM_COLS 10
+#define MINE_CONTROL_NUM_ROWS 15   
+#define MINE_CONTROL_NUM_COLS 20
 
-#define MINE_CONTROL_NUM_MINES 10
+#define MINE_CONTROL_NUM_MINES 60
 
 //init funciton for the mineControl. Used before all other functions.
 void mineControl_init();
