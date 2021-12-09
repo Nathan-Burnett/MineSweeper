@@ -1,5 +1,5 @@
-#ifndef CONGIG_LAB7
-#define CONGIG_LAB7
+#ifndef CONGIG_H_
+#define CONGIG_H_
 
 #define CONFIG_TIMER_PERIOD 50.0E-3
 
